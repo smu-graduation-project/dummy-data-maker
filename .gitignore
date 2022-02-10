@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 
 ### settingJDBC ###
-!**/src/settingJDBC.json
+/src/settingJDBC.json
 
 ### STS ###
 .apt_generated
