@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DummyData {
 
@@ -11,16 +12,11 @@ public class DummyData {
     private Long id;
     private int port;
     private int sequence;
-    private String date; //  SimpleDateFormat "yyyy-mm-dd" 형태로 받아서, 처리
+//    private String date; //  SimpleDateFormat "yyyy-mm-dd" 형태로 받아서, 처리
     private double data; // 일단 double로 설정, 실제 데이터는 다를 수 있음.
+//
+//    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // 날짜 포멧 (mysql: datetime)
 
-    public DummyData(Long id, int port, int sequence, SimpleDateFormat date, double data) {
-        this.id = id;
-        this.port = port;
-        this.sequence = sequence;
-        this.date = date.toString();
-        this.data = data;
-    }
 
     public Long getId() {
         return id;
@@ -46,14 +42,14 @@ public class DummyData {
         this.sequence = sequence;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(SimpleDateFormat date) {
-        this.date = date.toString();
-    }
-
+//    public String getDate() {
+//        return date;
+//    }
+//
+//    public void setDate(Date date) {
+//        this.date = dateFormat.format(date);
+//    }
+//
     public double getData() {
         return data;
     }
