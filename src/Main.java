@@ -1,19 +1,35 @@
+import com.mysql.cj.xdevapi.JsonParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.*;
+
+
+import java.io.FileReader;
+import java.io.Reader;
 import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) {
+    public static int DELAYTIME = 1; //데이터 전송 주기
+
+    public static void main(String[] args) throws Exception {
 
         JDBCController jdbcController = new JDBCController();
         RandomDummyData randomDummyData = new RandomDummyData();
+
+        Reader reader = new FileReader(Main.class.getResource("").getPath()+"settingJDBC.json");
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(reader);
+
+        JSONObject settingJDBC = (JSONObject)obj;
+
         Random random = new Random();
+
         Connection conn = null;
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/loraDummyData?useUnicode=true&" +
-                            "useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC",
-                    "root", "root");
+            conn = DriverManager.getConnection((String)settingJDBC.get("JDBCURL"), (String)settingJDBC.get("MYSQLID"), (String)settingJDBC.get("MYSQLPASSWORD"));
             Statement stmt = conn.createStatement();
 
         } catch (SQLException | ClassNotFoundException e) {
@@ -23,15 +39,20 @@ public class Main {
         Long id = Long.valueOf(0);
 
         while(true) {
-            while(id.longValue() < 10000) {
+            // 기준 : 하루 = 86,400초
+            while(id.longValue() < 100000) {
                 int rand = random.nextInt(10000);
-                if (rand != 1) jdbcController.pushDummyData(randomDummyData.makeDummyData(id++, 0), conn);
-                if (rand != 2) jdbcController.pushDummyData(randomDummyData.makeDummyData(id++, 1), conn);
-                if (rand != 3) jdbcController.pushDummyData(randomDummyData.makeDummyData(id++, 2), conn);
-                if (rand != 4) jdbcController.pushDummyData(randomDummyData.makeDummyData(id++, 3), conn);
+                // index를 기반으로 sequence, prot 설정
+                if (rand != 1) jdbcController.pushDummyData(randomDummyData.makeDummyData(0), conn);
+                if (rand != 2) jdbcController.pushDummyData(randomDummyData.makeDummyData(1), conn);
+                if (rand != 3) jdbcController.pushDummyData(randomDummyData.makeDummyData(2), conn);
+                if (rand != 4) jdbcController.pushDummyData(randomDummyData.makeDummyData(3), conn);
+
+                id++;
 
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    // 딜레이 시간
+                    TimeUnit.SECONDS.sleep(DELAYTIME);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
