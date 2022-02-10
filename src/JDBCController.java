@@ -18,6 +18,7 @@ public class JDBCController {
         }
     }
 
+    // Table 제거 및 재생성
     public void remakeTable(Connection conn) {
         dropTable(conn);
         makeTable(conn);

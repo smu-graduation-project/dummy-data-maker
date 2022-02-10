@@ -5,7 +5,6 @@ public class RandomDummyData {
 
     DummyData dummy = new DummyData();
     Random random = new Random();
-    LocalDate localDate;
     private int[] ports = {10,11,12,13};
     private int[] sequences = {1,1,1,1};
 

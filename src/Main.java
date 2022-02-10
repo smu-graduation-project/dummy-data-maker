@@ -1,4 +1,3 @@
-import com.mysql.cj.xdevapi.JsonParser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
@@ -17,6 +16,7 @@ public class Main {
         JDBCController jdbcController = new JDBCController();
         RandomDummyData randomDummyData = new RandomDummyData();
 
+        // Json 파일은 서버에 바로 적용하겠습니다.
         Reader reader = new FileReader(Main.class.getResource("").getPath()+"settingJDBC.json");
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(reader);
@@ -39,7 +39,7 @@ public class Main {
         Long id = Long.valueOf(0);
 
         while(true) {
-            // 기준 : 하루 = 86,400초
+            // 참고 : 하루 = 86,400초
             while(id.longValue() < 100000) {
                 int rand = random.nextInt(10000);
                 // index를 기반으로 sequence, prot 설정
