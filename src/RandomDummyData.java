@@ -15,5 +15,9 @@ public class RandomDummyData {
 
         return dummy;
     }
+    // 데이터 누락 발생시, 테스트용
+    public void addSequence(int index) {
+        sequences[index]++;
+    }
 
 }
