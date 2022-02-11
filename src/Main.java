@@ -16,7 +16,6 @@ public class Main {
         JDBCController jdbcController = new JDBCController();
         RandomDummyData randomDummyData = new RandomDummyData();
 
-        // Json 파일은 서버에 바로 적용하겠습니다.
         Reader reader = new FileReader(Main.class.getResource("").getPath()+"settingJDBC.json");
         JSONParser parser = new JSONParser();
         Object obj = parser.parse(reader);
@@ -36,18 +35,30 @@ public class Main {
             e.printStackTrace();
         }
 
-        Long id = Long.valueOf(0);
+        Long id = Long.valueOf(0); // 이후 시간을 유동적으로 변경하기 위해 Long type으로 설정
 
         while(true) {
             // 참고 : 하루 = 86,400초
             while(id.longValue() < 100000) {
+                // 1/10000확률로 데이터를 넘기지 않는다.(sequence 문제 발생)
                 int rand = random.nextInt(10000);
                 // index를 기반으로 sequence, prot 설정
-                if (rand != 1) jdbcController.pushDummyData(randomDummyData.makeDummyData(0), conn);
-                if (rand != 2) jdbcController.pushDummyData(randomDummyData.makeDummyData(1), conn);
-                if (rand != 3) jdbcController.pushDummyData(randomDummyData.makeDummyData(2), conn);
-                if (rand != 4) jdbcController.pushDummyData(randomDummyData.makeDummyData(3), conn);
-
+                if (rand != 1) {
+                    jdbcController.pushDummyData(randomDummyData.makeDummyData(0), conn);
+                    randomDummyData.addSequence(0);
+                }
+                if (rand != 2) {
+                    jdbcController.pushDummyData(randomDummyData.makeDummyData(1), conn);
+                    randomDummyData.addSequence(1);
+                }
+                if (rand != 3) {
+                    jdbcController.pushDummyData(randomDummyData.makeDummyData(2), conn);
+                    randomDummyData.addSequence(2);
+                }
+                if (rand != 4) {
+                    jdbcController.pushDummyData(randomDummyData.makeDummyData(3), conn);
+                    randomDummyData.addSequence(3);
+                }
                 id++;
 
                 try {
@@ -58,6 +69,7 @@ public class Main {
                 }
 
             }
+            // 데이터의 지속적인 누적을 막기위해 테이블을 reset.
             System.out.println("reset table");
             jdbcController.remakeTable(conn);
             id = Long.valueOf(0);
