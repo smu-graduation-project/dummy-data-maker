@@ -45,18 +45,26 @@ public class Main {
                 // index를 기반으로 sequence, prot 설정
                 if (rand != 1) {
                     jdbcController.pushDummyData(randomDummyData.makeDummyData(0), conn);
+                }
+                else {
                     randomDummyData.addSequence(0);
                 }
                 if (rand != 2) {
                     jdbcController.pushDummyData(randomDummyData.makeDummyData(1), conn);
+                }
+                else {
                     randomDummyData.addSequence(1);
                 }
                 if (rand != 3) {
                     jdbcController.pushDummyData(randomDummyData.makeDummyData(2), conn);
+                }
+                else {
                     randomDummyData.addSequence(2);
                 }
                 if (rand != 4) {
                     jdbcController.pushDummyData(randomDummyData.makeDummyData(3), conn);
+                }
+                else {
                     randomDummyData.addSequence(3);
                 }
                 id++;
@@ -72,6 +80,7 @@ public class Main {
             // 데이터의 지속적인 누적을 막기위해 테이블을 reset.
             System.out.println("reset table");
             jdbcController.remakeTable(conn);
+            randomDummyData.resetData();
             id = Long.valueOf(0);
         }
     }
