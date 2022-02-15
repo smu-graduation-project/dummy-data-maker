@@ -19,5 +19,8 @@ public class RandomDummyData {
     public void addSequence(int index) {
         sequences[index]++;
     }
+    public void resetData() {
+        sequences = new int[]{1, 1, 1, 1};
+    }
 
 }
