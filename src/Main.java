@@ -3,85 +3,82 @@ import org.json.simple.parser.*;
 
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static int DELAYTIME = 1; //데이터 전송 주기
+    private static final int DELAYTIME = 1; //데이터 전송 주기
+    private static final String JDBCURL = "jdbcUrl";
+    private static final String MYSQLID = "mysqlId";
+    private static final String MYSQLPW = "mysqlPW";
+
+    private static JDBCController jdbcController = new JDBCController();
+    private static RandomDummyData randomDummyData = new RandomDummyData();
+    private static Random random = new Random();
+    private static Connection conn;
 
     public static void main(String[] args) throws Exception {
+        JSONObject settingJDBC = getJsonObject();
+        setJDBC(settingJDBC);
 
-        JDBCController jdbcController = new JDBCController();
-        RandomDummyData randomDummyData = new RandomDummyData();
+        while (true) {
+            BigInteger id = new BigInteger("0");
+            makeAndPushData(id);
+        }
+    }
 
-        Reader reader = new FileReader(Main.class.getResource("").getPath()+"settingJDBC.json");
-        JSONParser parser = new JSONParser();
-        Object obj = parser.parse(reader);
+    private static void makeAndPushData(BigInteger id) {
+        // 확률적으로 데이터를 넘기지 않는다.(sequence 문제 발생을 가정)
+        int rand = random.nextInt(100000);
+        for (int i = 0; i < 4; i++) {
+            pushData(jdbcController, randomDummyData, conn, rand, i + 1);
+        }
+        delayTime();
+        id.add(new BigInteger("1"));
+    }
 
-        JSONObject settingJDBC = (JSONObject)obj;
+    private static void pushData(JDBCController jdbcController, RandomDummyData randomDummyData, Connection conn, int rand, int i) {
+        if (rand != i) {
+            jdbcController.pushDummyData(randomDummyData.makeDummyData(i - 1), conn);
+        } else {
+            randomDummyData.addSequence(i - 1);
+        }
+    }
 
-        Random random = new Random();
-
-        Connection conn = null;
-
+    private static void setJDBC(JSONObject settingJDBC) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection((String)settingJDBC.get("JDBCURL"), (String)settingJDBC.get("MYSQLID"), (String)settingJDBC.get("MYSQLPASSWORD"));
-            Statement stmt = conn.createStatement();
+            conn = DriverManager.getConnection((String) settingJDBC.get(JDBCURL), (String) settingJDBC.get(MYSQLID), (String) settingJDBC.get(MYSQLPW));
 
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
 
-        Long id = Long.valueOf(0); // 이후 시간을 유동적으로 변경하기 위해 Long type으로 설정
+    private static JSONObject getJsonObject() throws IOException, ParseException {
+        Reader reader = new FileReader(Main.class.getResource("").getPath() + "settingJDBC.json");
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(reader);
 
-        while(true) {
-            // 참고 : 하루 = 86,400초
-            while(id.longValue() < 100000) {
-                // 1/10000확률로 데이터를 넘기지 않는다.(sequence 문제 발생)
-                int rand = random.nextInt(10000);
-                // index를 기반으로 sequence, prot 설정
-                if (rand != 1) {
-                    jdbcController.pushDummyData(randomDummyData.makeDummyData(0), conn);
-                }
-                else {
-                    randomDummyData.addSequence(0);
-                }
-                if (rand != 2) {
-                    jdbcController.pushDummyData(randomDummyData.makeDummyData(1), conn);
-                }
-                else {
-                    randomDummyData.addSequence(1);
-                }
-                if (rand != 3) {
-                    jdbcController.pushDummyData(randomDummyData.makeDummyData(2), conn);
-                }
-                else {
-                    randomDummyData.addSequence(2);
-                }
-                if (rand != 4) {
-                    jdbcController.pushDummyData(randomDummyData.makeDummyData(3), conn);
-                }
-                else {
-                    randomDummyData.addSequence(3);
-                }
-                id++;
+        JSONObject settingJDBC = (JSONObject) obj;
+        return settingJDBC;
+    }
 
-                try {
-                    // 딜레이 시간
-                    TimeUnit.SECONDS.sleep(DELAYTIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            // 데이터의 지속적인 누적을 막기위해 테이블을 reset.
-            System.out.println("reset table");
-            jdbcController.remakeTable(conn);
-            randomDummyData.resetData();
-            id = Long.valueOf(0);
+    private static void delayTime() {
+        try {
+            TimeUnit.SECONDS.sleep(DELAYTIME);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+    }
+
+    private static void resetDB() {
+        System.out.println("reset table");
+        jdbcController.remakeTable(conn);
+        randomDummyData.resetData();
     }
 }
