@@ -1,0 +1,5 @@
+{
+  "JDBCURL": "jdbc:mysql://localhost/loratest?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC",
+  "MYSQLID": "lora",
+  "MYSQLPASSWORD" : "loralora"
+},

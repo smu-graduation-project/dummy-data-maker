@@ -2,6 +2,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static java.time.LocalTime.now;
+
 public class JDBCController {
 
     private Statement stmt;
@@ -11,7 +13,11 @@ public class JDBCController {
             stmt = conn.createStatement();
             stmt.executeUpdate("INSERT INTO dummyData (" +
                     "port, sequence, date, data)" +
-                    "values ("+dummyData.getPort()+", "+dummyData.getSequence()+", now(), "+String.format("%.3f", dummyData.getData())+");");
+                    "values ("
+                    +dummyData.getPort()+", "
+                    +dummyData.getSequence()+","
+                    +now() +","
+                    +dummyData.getData()+");");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -29,11 +35,11 @@ public class JDBCController {
         try {
             stmt = conn.createStatement();
             stmt.executeUpdate(" CREATE TABLE dummyData ( " +
-                    "id INT NOT NULL AUTO_INCREMENT," +
+                    "id BIGINT NOT NULL AUTO_INCREMENT," +
                     "port INT NOT NULL, " +
-                    "sequence  INT NOT NULL," +
+                    "sequence  BIGINT NOT NULL," +
                     "date TIMESTAMP NOT NULL," +
-                    "data DOUBLE," +
+                    "data TEXT," +
                     "PRIMARY KEY(id));");
 
         } catch (SQLException e) {
