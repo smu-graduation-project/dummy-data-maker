@@ -11,14 +11,11 @@ public class JDBCController {
         // data 입력
         try {
             stmt = conn.createStatement();
-            stmt.executeUpdate("INSERT INTO dummyData (" +
-                    "port, sequence, date, data)" +
-                    "values ("
-                    +dummyData.getPort()+", "
-                    +dummyData.getSequence()+","
-                    +now() +","
-                    +dummyData.getData()+");");
-
+            stmt.executeUpdate("INSERT INTO dummyData (port, sequence, data)" +
+                    "values("
+                    + dummyData.getPort()+", "
+                    + dummyData.getSequence()+", \'"
+                    + dummyData.getData()+ " \');");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -38,8 +35,8 @@ public class JDBCController {
                     "id BIGINT NOT NULL AUTO_INCREMENT," +
                     "port INT NOT NULL, " +
                     "sequence  BIGINT NOT NULL," +
-                    "date TIMESTAMP NOT NULL," +
-                    "data TEXT," +
+                    "date TIMESTAMP NOT NULL default current_timestamp ," +
+                    "data char(30), " +
                     "PRIMARY KEY(id));");
 
         } catch (SQLException e) {
