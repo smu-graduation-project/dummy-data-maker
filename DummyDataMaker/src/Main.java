@@ -11,10 +11,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
-    private static final int DELAYTIME = 1; //데이터 전송 주기
-    private static final String JDBCURL = "jdbcUrl";
-    private static final String MYSQLID = "mysqlId";
-    private static final String MYSQLPW = "mysqlPW";
+    private static final int DELAYTIME = 5; //데이터 전송 주기
 
     private static JDBCController jdbcController = new JDBCController();
     private static RandomDummyData randomDummyData = new RandomDummyData();
@@ -24,6 +21,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         JSONObject settingJDBC = getJsonObject();
         setJDBC(settingJDBC);
+
+        jdbcController.remakeTable(conn);
 
         while (true) {
             BigInteger id = new BigInteger("0");
@@ -52,7 +51,7 @@ public class Main {
     private static void setJDBC(JSONObject settingJDBC) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection((String) settingJDBC.get(JDBCURL), (String) settingJDBC.get(MYSQLID), (String) settingJDBC.get(MYSQLPW));
+            conn = DriverManager.getConnection((String) settingJDBC.get("JDBCURL"), (String)settingJDBC.get("MYSQLID"), (String) settingJDBC.get("MYSQLPASSWORD"));
 
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();

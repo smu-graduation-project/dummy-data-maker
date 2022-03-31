@@ -7,7 +7,7 @@ public class RandomDummyData {
     DummyData dummy = new DummyData();
     Random random = new Random();
     private int[] ports = {10,11,12,13};
-    private BigInteger[] sequences = {new BigInteger("1"), new BigInteger("1"), new BigInteger("1"), new BigInteger("1")};
+    private BigInteger[] sequences = {new BigInteger("0"), new BigInteger("0"), new BigInteger("0"), new BigInteger("0")};
 
     public DummyData makeDummyData(int index) {
         dummy.setPort(ports[index]);
@@ -26,13 +26,14 @@ public class RandomDummyData {
 
     private String makeASCII(){
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < 4; i++) {
+
+        for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 2; j++) {
-                sb.append((byte) random.nextInt());
+                sb.append(random.nextInt(9)+30);
             }
-            sb.append((byte) '.');
+            sb.append("2e");
             for(int j = 0; j < 2; j++) {
-                sb.append((byte) random.nextInt());
+                sb.append(random.nextInt(9)+30);
             }
         }
         return sb.toString();
