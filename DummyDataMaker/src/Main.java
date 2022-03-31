@@ -25,26 +25,24 @@ public class Main {
         jdbcController.remakeTable(conn);
 
         while (true) {
-            BigInteger id = new BigInteger("0");
-            makeAndPushData(id);
+            makeAndPushData();
         }
     }
 
-    private static void makeAndPushData(BigInteger id) {
+    private static void makeAndPushData() {
         // 확률적으로 데이터를 넘기지 않는다.(sequence 문제 발생을 가정)
         int rand = random.nextInt(100000);
         for (int i = 0; i < 4; i++) {
-            pushData(jdbcController, randomDummyData, conn, rand, i + 1);
+            pushData(jdbcController, randomDummyData, conn, rand, i);
         }
         delayTime();
-        id.add(new BigInteger("1"));
     }
 
     private static void pushData(JDBCController jdbcController, RandomDummyData randomDummyData, Connection conn, int rand, int i) {
         if (rand != i) {
-            jdbcController.pushDummyData(randomDummyData.makeDummyData(i - 1), conn);
+            jdbcController.pushDummyData(randomDummyData.makeDummyData(i), conn);
         } else {
-            randomDummyData.addSequence(i - 1);
+            randomDummyData.addSequence(i);
         }
     }
 
