@@ -57,7 +57,6 @@ uint8_t rx_buffer[30];
  */
 #define PC_9                            0
 
-
 /**
 * This event queue is the global event queue for both the
 * application and stack. To conserve memory, the stack is designed to run
@@ -92,17 +91,9 @@ char myChecksum[] = "Ok";
 DHT11::DHT11_status_t aux;
 DHT11::DHT11_data_t   myDHT11_Data;
  
-DigitalOut  myled ( LED1 );
-Ticker      newAction;
-//@brief Constants.
 
-//@brief Variables.
 volatile uint32_t myState;                                                      // State that indicates when to perform a new sample  
  
-void changeDATA ( void )
-{
-    myState  =   1UL;
-}
 
 
 /**
@@ -110,18 +101,13 @@ void changeDATA ( void )
  */
 int main(void)
 {
-     
+    // setup tracing
+    setup_trace();
+
     // DHT11 starts: Release the bus  
     aux  =   myDHT11.DHT11_Init ();
  
     myState  =   0UL;                                                           // Reset the variable
-    newAction.attach( &changeDATA, 1U );                                        // the address of the function to be attached ( changeDATA ) and the interval ( 1s )
- 
-    printf("STRAT\n");
-    // Let the callbacks take care of everything
-
-    // setup tracing
-    setup_trace();
 
     // stores the status of a call to LoRaWAN protocol
     lorawan_status_t retcode;
@@ -173,6 +159,46 @@ int main(void)
     return 0;
 }
 
+constexpr float convertToFloat(uint16_t u16) {
+    uint16_t zero =0x0000;
+    float temp = 0.0;
+
+    if((u16 & 0x0001) != zero) {
+        temp += (float)1/(float)2;
+    }
+
+    if((u16 & 0x0002) != zero) {
+        temp += (float)1/(float)4;
+    }
+
+    if((u16 & 0x0004) != zero) {
+        temp += (float)1/(float)8;
+    }
+
+    if((u16 & 0x0008) != zero) {
+        temp += (float)1/(float)16;
+    }
+
+    if((u16 & 0x0010) != zero) {
+        temp += (float)1/(float)32;
+    }
+
+    if((u16 & 0x0020) != zero) {
+        temp += (float)1/(float)64;
+    }
+
+    if((u16 & 0x0040) != zero) {
+        temp += (float)1/(float)128;
+    }
+
+    if((u16 & 0x008) != zero) {
+        temp += (float)1/(float)256;
+    }
+
+    return temp; // implicit conversion to return type
+}
+
+
 /**
  * Sends a message to the Network Server
  */
@@ -180,48 +206,40 @@ static void send_message()
 {
     uint16_t packet_len;
     int16_t retcode;
-    int32_t sensor_temperature = 0;
-    int32_t sensor_humidty = 0;
+    uint8_t sensor_temperature = 0;
+    uint8_t sensor_humidty = 0;
 
-    // if (ds1820.begin()) {
-    //     ds1820.startConversion();
-    //     sensor_value = ds1820.read();
-    //     printf("\r\n Dummy Sensor Value = %d \r\n", sensor_value);
-    //     ds1820.startConversion();
-    // }     
+    float sensor_temperature_f = 0.0;
+    float sensor_humidty_f = 0.0;
 
-    if ( myState == 1UL ) {
-        myled = 1U;
+    // Get a new data 
+    aux  =   myDHT11.DHT11_GetData ( &myDHT11_Data );
 
-        // Get a new data 
-        aux  =   myDHT11.DHT11_GetData ( &myDHT11_Data );
-
-        // Check checksum to validate data  
-        if ( myDHT11_Data.checksumStatus == DHT11::DHT11_CHECKSUM_OK  ) {
-            myChecksum[0]  =   'O';
-            myChecksum[1]  =   'k';
-        } else {
-            myChecksum[0]  =   'E';
-            myChecksum[1]  =   'r';
-        }
-
-        sensor_temperature = myDHT11_Data.temperature;
-        sensor_humidty = myDHT11_Data.humidity;
-        // Send data through the UART    
-        printf ( "T: %d C | RH: %d %% | Checksum: %s\r\n", sensor_temperature, sensor_humidty, myChecksum );
-
-
-        // Reset the variables   
-        myState  =   0UL;
-        myled    =   0U;
+    // Check checksum to validate data  
+    if ( myDHT11_Data.checksumStatus == DHT11::DHT11_CHECKSUM_OK  ) {
+        myChecksum[0]  =   'O';
+        myChecksum[1]  =   'k';
+    } else {
+        myChecksum[0]  =   'E';
+        myChecksum[1]  =   'r';
     }
+
+    sensor_temperature = myDHT11_Data.temperature;
+    sensor_humidty = myDHT11_Data.humidity;
+
+    sensor_temperature_f = sensor_temperature + convertToFloat(myDHT11_Data.rawTemperature);
+    sensor_humidty_f = sensor_humidty + convertToFloat(myDHT11_Data.rawHumidity);
+
+    printf ( "Test Bits T: %.2f C | RH: %.2f %% | Checksum: %s\r\n", sensor_temperature_f ,sensor_humidty_f, myChecksum );
+
     
     if(myChecksum[0] == 'E') {
         printf("\r\n No sensor found \r\n");
         return;
     }
 
-    packet_len = sprintf((char *) tx_buffer, "%d%d", sensor_temperature, sensor_humidty);
+    packet_len = sprintf((char *) tx_buffer, "%.2f%.2f",
+                        sensor_temperature_f, sensor_humidty_f);
 
     retcode = lorawan.send(MBED_CONF_LORA_APP_PORT, tx_buffer, packet_len,
                            MSG_UNCONFIRMED_FLAG);
