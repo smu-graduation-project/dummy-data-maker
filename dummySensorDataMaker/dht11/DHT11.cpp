@@ -16,6 +16,7 @@
  */
  
 #include "DHT11.h"
+#include <cstdint>
  
  
 DHT11::DHT11 ( PinName dht11 )
@@ -307,7 +308,6 @@ DHT11::DHT11_status_t DHT11::DHT11_GetData ( DHT11_data_t* myData )
   /* Parse the data  */
   myData->humidity     =   (uint8_t)( myData->rawHumidity >> 8U );
   myData->temperature  =   (uint8_t)( myData->rawTemperature >> 8U );
-  
   
   return  aux;
 }
